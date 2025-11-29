@@ -1,73 +1,205 @@
-# Welcome to your Lovable project
+# 🌟 Aura Synergy Hub
 
-## Project info
+**Your Holistic Student Success Platform**
 
-**URL**: https://lovable.dev/projects/923d7607-3d30-429f-a28c-1fbe7455036e
+A comprehensive AI-powered platform designed for students and professionals to manage career goals, mental wellness, and physical health in one integrated dashboard. Track your coding progress, get personalized coaching, and achieve your goals with intelligent insights.
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+### 📊 **Dashboard & Analytics**
+- Real-time coding statistics from LeetCode, CodeChef, and Codeforces
+- Monthly goal tracking with progress visualization
+- Streak tracking and performance analytics
+- Comprehensive activity calendar
 
-**Use Lovable**
+### 🎯 **Day Tracker**
+- Daily progress monitoring
+- Goal setting and achievement tracking
+- Activity synchronization across platforms
+- Performance insights and trends
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/923d7607-3d30-429f-a28c-1fbe7455036e) and start prompting.
+### 🧠 **Mental Wellness Coach**
+- AI-powered mental health assistant
+- Mood tracking and analysis
+- Stress management techniques
+- Professional psychologist recommendations (Premium)
 
-Changes made via Lovable will be committed automatically to this repo.
+### 💪 **Physical Wellness Coach**
+- BMI calculation and health metrics
+- Food analysis through image recognition
+- Personalized diet and exercise plans
+- Certified trainer connections (Premium)
 
-**Use your preferred IDE**
+### 🗺️ **Career Roadmaps**
+- Interactive career path planning
+- Milestone tracking and progress monitoring
+- Template-based learning journeys
+- Skill development guidance
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Quick Start
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
+- Node.js (v16 or higher)
+- PostgreSQL database
+- Git
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1. **Clone the repository**
+```bash
+git clone <your-repo-url>
+cd aura-synergy-hub-55
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. **Quick Start (Windows)**
+```bash
+# Double-click to start both servers
+START_SERVERS.bat
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3. **Manual Setup**
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+**Backend Setup:**
+```bash
+cd backend
+npm install
+npm start
+```
+
+**Frontend Setup:**
+```bash
+cd Frontend
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Access the Application
+- **Frontend**: http://localhost:8080
+- **Backend API**: http://localhost:3001
+- **Health Check**: http://localhost:3001/health
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🏗️ Project Architecture
 
-**Use GitHub Codespaces**
+```
+aura-synergy-hub-55/
+├── Frontend/                    # React + TypeScript Application
+│   ├── src/
+│   │   ├── components/         # Reusable UI components
+│   │   ├── pages/             # Main application pages
+│   │   ├── lib/               # API client and utilities
+│   │   └── styles/            # CSS and styling
+│   ├── public/                # Static assets
+│   └── package.json           # Frontend dependencies
+│
+├── backend/                    # Node.js + Express API
+│   ├── routes/                # API endpoints
+│   ├── services/              # Business logic
+│   ├── config/                # Database configuration
+│   ├── middleware/            # Authentication & validation
+│   └── migrations/            # Database migrations
+│
+└── START_SERVERS.bat          # Quick start script
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🛠️ Technology Stack
 
-## What technologies are used for this project?
+### Frontend
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS + shadcn/ui
+- **State Management**: React Hooks + Context API
+- **HTTP Client**: Custom API wrapper
 
-This project is built with:
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: PostgreSQL
+- **Authentication**: JWT tokens
+- **Web Scraping**: Puppeteer
+- **AI Integration**: OpenAI API
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Database Schema
+- **Users & Profiles**: Authentication and user data
+- **Coding Stats**: Platform statistics and progress
+- **Activity Tracking**: Daily progress and goals
+- **Roadmap System**: Career paths and milestones
+- **Health Metrics**: Physical and mental wellness data
 
-## How can I deploy this project?
+## 🔧 Configuration
 
-Simply open [Lovable](https://lovable.dev/projects/923d7607-3d30-429f-a28c-1fbe7455036e) and click on Share -> Publish.
+### Environment Variables
+Create `.env` files in both `Frontend/` and `backend/` directories:
 
-## Can I connect a custom domain to my Lovable project?
+**Backend (.env):**
+```env
+DATABASE_URL=your_postgresql_connection_string
+JWT_SECRET=your_jwt_secret
+OPENAI_API_KEY=your_openai_api_key
+PORT=3001
+```
 
-Yes, you can!
+**Frontend (.env):**
+```env
+VITE_API_BASE_URL=http://localhost:3001/api
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📱 Key Pages
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+1. **Dashboard** - Overview of all metrics and progress
+2. **Day Tracker** - Daily activity and goal management
+3. **Mental Coach** - AI-powered wellness assistance
+4. **Physical Coach** - Health metrics and coaching
+5. **Roadmaps** - Career planning and milestone tracking
+
+## 🎨 UI Components
+
+- **Modern Design**: Clean, responsive interface
+- **Dark/Light Mode**: Automatic theme switching
+- **Interactive Charts**: Progress visualization
+- **Real-time Updates**: Live data synchronization
+- **Mobile Responsive**: Works on all devices
+
+## 🔐 Security Features
+
+- JWT-based authentication
+- Secure API endpoints
+- Input validation and sanitization
+- CORS protection
+- Environment variable protection
+
+## 📊 Data Sources
+
+- **LeetCode**: Problem solving statistics
+- **CodeChef**: Contest participation and ratings
+- **Codeforces**: Competitive programming metrics
+- **Manual Input**: Goals, health metrics, activities
+
+## 🚀 Deployment
+
+The application is ready for deployment on:
+- **Frontend**: Netlify, Vercel, or any static hosting
+- **Backend**: Heroku, Railway, or any Node.js hosting
+- **Database**: PostgreSQL on Heroku, Supabase, or similar
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support and questions:
+- Check the application's built-in help sections
+- Review the API documentation at `/health`
+- Contact the development team
+
+---
+
+**Built with ❤️ for student success and holistic wellness**

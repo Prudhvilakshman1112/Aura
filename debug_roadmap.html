@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Roadmap API</title>
+</head>
+<body>
+    <h1>Roadmap API Debug</h1>
+    <div id="results"></div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:3001/api';
+        
+        function getAuthHeaders() {
+            const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+            console.log('Token found:', token ? 'Yes' : 'No');
+            return {
+                'Content-Type': 'application/json',
+                ...(token && { Authorization: `Bearer ${token}` })
+            };
+        }
+        
+        async function testAPI() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Testing API endpoints...</h2>';
+            
+            try {
+                // Test 1: Get templates
+                console.log('Testing templates endpoint...');
+                const templatesResponse = await fetch(`${API_BASE_URL}/roadmaps/templates`, {
+                    headers: getAuthHeaders()
+                });
+                const templatesData = await templatesResponse.json();
+                console.log('Templates response:', templatesData);
+                
+                results.innerHTML += `<h3>Templates (${templatesResponse.status}):</h3><pre>${JSON.stringify(templatesData, null, 2)}</pre>`;
+                
+                // Test 2: Get user paths
+                console.log('Testing user-paths endpoint...');
+                const userPathsResponse = await fetch(`${API_BASE_URL}/roadmaps/user-paths`, {
+                    headers: getAuthHeaders()
+                });
+                const userPathsData = await userPathsResponse.json();
+                console.log('User paths response:', userPathsData);
+                
+                results.innerHTML += `<h3>User Paths (${userPathsResponse.status}):</h3><pre>${JSON.stringify(userPathsData, null, 2)}</pre>`;
+                
+                // Test 3: Clone template (if templates exist)
+                if (templatesData.data && templatesData.data.templates && templatesData.data.templates.length > 0) {
+                    const templateId = templatesData.data.templates[0].id;
+                    console.log('Testing clone template with ID:', templateId);
+                    
+                    const cloneResponse = await fetch(`${API_BASE_URL}/roadmaps/select-roadmap`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({ roadmapId: templateId })
+                    });
+                    const cloneData = await cloneResponse.json();
+                    console.log('Clone response:', cloneData);
+                    
+                    results.innerHTML += `<h3>Clone Template (${cloneResponse.status}):</h3><pre>${JSON.stringify(cloneData, null, 2)}</pre>`;
+                }
+                
+            } catch (error) {
+                console.error('API test error:', error);
+                results.innerHTML += `<h3>Error:</h3><pre>${error.message}</pre>`;
+            }
+        }
+        
+        // Run test on page load
+        testAPI();
+    </script>
+</body>
+</html>

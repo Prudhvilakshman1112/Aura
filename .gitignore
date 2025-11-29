@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Ignore environment files
+backend/.env
+
+# Ignore files that contain hardcoded secrets or environment variables
+backend/execute_daily_solved_migration.bat
+backend/execute_activity_migration.bat
+backend/execute_daily_tracking_migration.bat
