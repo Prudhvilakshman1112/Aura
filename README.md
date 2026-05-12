@@ -1,4 +1,4 @@
-# 🌟 Aura Synergy Hub
+# 🌟 Aura 
 
 **Your Holistic Student Success Platform**
 
