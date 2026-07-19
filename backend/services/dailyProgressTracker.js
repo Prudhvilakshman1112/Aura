@@ -46,7 +46,7 @@ class DailyProgressTracker {
       throw error;
     } finally {
       if (client) {
-        await client.end();
+        client.release();
       }
     }
   }
@@ -69,7 +69,7 @@ class DailyProgressTracker {
       throw error;
     } finally {
       if (client) {
-        await client.end();
+        client.release();
       }
     }
   }
@@ -250,7 +250,7 @@ class DailyProgressTracker {
       throw error;
     } finally {
       if (client) {
-        await client.end();
+        client.release();
       }
     }
   }
@@ -288,7 +288,7 @@ class DailyProgressTracker {
       throw error;
     } finally {
       if (client) {
-        await client.end();
+        client.release();
       }
     }
   }

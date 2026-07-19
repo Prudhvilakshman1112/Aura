@@ -89,7 +89,7 @@ router.post('/register', validateRequest(registerSchema), async (req, res) => {
       message: 'Internal server error during registration'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 
@@ -153,7 +153,7 @@ router.post('/login', validateRequest(loginSchema), async (req, res) => {
       message: 'Internal server error during login'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 

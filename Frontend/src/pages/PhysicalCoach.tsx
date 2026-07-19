@@ -384,7 +384,7 @@ const PhysicalCoach = () => {
               </Button>
               
               {dietPlan && (
-                <div className="mt-4 p-6 glass rounded-xl border border-blue-200/30 bg-gradient-to-br from-blue-50/80 to-cyan-50/80 dark:from-blue-900/20 dark:to-cyan-900/20 max-h-80 overflow-y-auto animate-fade-in">
+                <div className="mt-4 p-6 glass rounded-xl border border-blue-200/30 bg-gradient-to-br from-blue-50/80 to-cyan-50/80 dark:from-blue-900/20 dark:to-cyan-900/20 animate-fade-in">
                   <div className="flex items-center mb-4">
                     <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center mr-3">
                       <CheckCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -452,7 +452,7 @@ const PhysicalCoach = () => {
               </Button>
               
               {exercisePlan && (
-                <div className="mt-4 p-6 glass rounded-xl border border-purple-200/30 bg-gradient-to-br from-purple-50/80 to-pink-50/80 dark:from-purple-900/20 dark:to-pink-900/20 max-h-80 overflow-y-auto animate-fade-in">
+                <div className="mt-4 p-6 glass rounded-xl border border-purple-200/30 bg-gradient-to-br from-purple-50/80 to-pink-50/80 dark:from-purple-900/20 dark:to-pink-900/20 animate-fade-in">
                   <div className="flex items-center mb-4">
                     <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-800/50 flex items-center justify-center mr-3">
                       <CheckCircle className="w-5 h-5 text-purple-600 dark:text-purple-400" />

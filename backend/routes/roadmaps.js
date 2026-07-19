@@ -304,7 +304,7 @@ router.post('/select-roadmap', authenticateToken, async (req, res) => {
     });
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 });
@@ -319,7 +319,7 @@ async function updateCareerPathProgress(userId, roadmapId) {
     console.error('Error updating career path progress:', error);
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 }
@@ -523,7 +523,7 @@ router.post('/delete-career-path', authenticateToken, async (req, res) => {
     });
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 });
@@ -582,7 +582,7 @@ router.put('/module-completion', authenticateToken, async (req, res) => {
     });
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 });
@@ -761,7 +761,7 @@ router.put('/module/:careerPathId/:moduleName', authenticateToken, async (req, r
     });
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 });
@@ -869,7 +869,7 @@ router.delete('/career-path/:careerPathId', authenticateToken, async (req, res) 
     });
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 });

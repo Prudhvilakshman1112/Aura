@@ -75,7 +75,7 @@ export async function calculateCurrentStreak(userId) {
     return 0;
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 }
@@ -120,7 +120,7 @@ export async function calculateBestStreak(userId) {
     return 0;
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 }
@@ -149,7 +149,7 @@ export async function calculateActiveDaysThisMonth(userId) {
     return 0;
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 }
@@ -200,7 +200,7 @@ export async function getContributionData(userId) {
     return [];
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 }
@@ -217,7 +217,7 @@ export async function calculateMonthlyProgress(userId) {
     return { current: 0, goal: 50, percentage: 0 };
   } finally {
     if (client) {
-      await client.end();
+      client.release();
     }
   }
 }

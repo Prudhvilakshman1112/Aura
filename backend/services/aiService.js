@@ -20,9 +20,9 @@ const hf = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
 class AIService {
   constructor() {
-    this.groqModel = 'openai/gpt-oss-20b';
+    this.groqModel = 'llama-3.1-8b-instant';
     this.sentimentModel = 'cardiffnlp/twitter-roberta-base-sentiment-latest';
-    this.foodClassifierModel = 'Siddu2004-2006/indian_food_finetuned_model';
+    this.foodClassifierModel = 'nateraw/food';
     // Only use the specified Indian food model - no fallbacks
     this.fallbackFoodModels = [];
     this.dailyTracker = new DailyTrackingService();
@@ -193,6 +193,25 @@ class AIService {
     }
   }
 
+  generateHealthRecommendations(userContext) {
+    const bmi = this.calculateBMI(userContext.height_cm, userContext.weight_kg);
+    return this.getDietRecommendations(bmi, userContext);
+  }
+
+  generateMealSuggestions(userContext) {
+    const userName = userContext.name || 'friend';
+    return [
+      `Let's plan some healthy meals together, ${userName}!`,
+      'Focus on portion control and mindful eating.',
+      'Include a variety of nutrient-dense foods in your diet.'
+    ];
+  }
+
+  generateExerciseTips(userContext) {
+    const bmi = this.calculateBMI(userContext.height_cm, userContext.weight_kg);
+    return this.getExerciseRecommendations(bmi, userContext);
+  }
+
   /**
    * Generate AI response for Physical Coach
    * @param {string} userMessage - User's health question
@@ -318,7 +337,7 @@ class AIService {
       let response;
       try {
         response = await axios.post(
-          `https://api-inference.huggingface.co/models/${this.foodClassifierModel}`,
+          `https://router.huggingface.co/hf-inference/models/${this.foodClassifierModel}`,
           imageBuffer,
           {
             headers: {
@@ -333,7 +352,7 @@ class AIService {
         console.log('🔄 Primary model failed, trying alternative Indian food model...');
         const alternativeModel = 'nateraw/food';
         response = await axios.post(
-          `https://api-inference.huggingface.co/models/${alternativeModel}`,
+          `https://router.huggingface.co/hf-inference/models/${alternativeModel}`,
           imageBuffer,
           {
             headers: {
@@ -394,7 +413,6 @@ class AIService {
       // Try ONLY the Indian food model using pipeline-style approach
       try {
         console.log(`🤖 Attempting analysis with Indian food model: ${this.foodClassifierModel}`);
-        console.log(`🔧 HF Client initialized: ${!!hf}`);
         
         // Try direct API call first, with fallback to working models
         try {
@@ -402,13 +420,21 @@ class AIService {
           result = await this.classifyFoodPipeline(imageBuffer);
           modelUsed = this.foodClassifierModel;
         } catch (apiError) {
-          console.log('🔄 Direct API failed, trying HF client with alternative model...');
-          // Try a working food classification model
-          result = await hf.imageClassification({
-            model: 'nateraw/food',
-            data: imageBuffer
-          });
-          modelUsed = 'nateraw/food';
+          console.log('🔄 Direct API failed, trying direct HTTP call with fallback model...');
+          const fallbackModel = 'nateraw/food';
+          const fallbackResponse = await axios.post(
+            `https://router.huggingface.co/hf-inference/models/${fallbackModel}`,
+            imageBuffer,
+            {
+              headers: {
+                'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+                'Content-Type': 'application/octet-stream'
+              },
+              timeout: 30000
+            }
+          );
+          result = fallbackResponse.data;
+          modelUsed = fallbackModel;
         }
         console.log('✅ Indian food model successful');
         console.log('📊 Raw result:', JSON.stringify(result, null, 2));
@@ -552,6 +578,10 @@ class AIService {
   mapToIndianFood(originalLabel) {
     // Indian food mapping dictionary
     const indianFoodMapping = {
+      // Direct matches
+      'samosa': 'samosa',
+      'biryani': 'biryani',
+      
       // Rice dishes
       'rice': 'rice',
       'fried rice': 'biryani',
@@ -587,7 +617,7 @@ class AIService {
       'pickle': 'achar'
     };
 
-    const lowerLabel = originalLabel.toLowerCase();
+    const lowerLabel = originalLabel.toLowerCase().replace(/_/g, ' ');
     
     // Direct match
     if (indianFoodMapping[lowerLabel]) {
@@ -601,8 +631,11 @@ class AIService {
       }
     }
     
-    // Default to mixed Indian dish
-    return 'mixed Indian dish';
+    // Format original label (replace underscores with spaces, capitalize words)
+    return originalLabel
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 
   /**
@@ -1034,26 +1067,111 @@ class AIService {
     return 'Beginner - Medical consultation recommended';
   }
 
+  isUnhealthyFood(foodItem) {
+    const lower = foodItem.toLowerCase().replace(/_/g, ' ');
+    const unhealthyKeywords = [
+      'samosa', 'butter chicken', 'chole bhature', 'dal makhani', 'paratha',
+      'hamburger', 'french fries', 'calamari', 'wings', 'cheese sandwich',
+      'macaroni and cheese', 'gulab jamun', 'jalebi', 'cake', 'cheesecake',
+      'mousse', 'churros', 'cup cake', 'donut', 'ice cream', 'macaron',
+      'panna cotta', 'tiramisu', 'waffle', 'pizza', 'ribs', 'baklava', 'croque madame',
+      'onion rings'
+    ];
+    return unhealthyKeywords.some(keyword => lower.includes(keyword));
+  }
+
   async getFoodRecommendations(foodItem, userContext, bmi) {
     const userName = userContext.name || 'friend';
-    const recommendations = [];
+    const bmiStatus = this.getBMIStatus(bmi);
+    const nutritionInfo = this.getIndianFoodNutrition(foodItem);
+    
+    // Try generating dynamic recommendations using Groq LLM first
+    try {
+      const systemPrompt = `You are a certified nutritionist and health coach. 
+Analyze the identified food item and evaluate it for the user based on their profile and goals:
+- User Name: ${userName}
+- Age: ${userContext.age || 'Not specified'}
+- Gender: ${userContext.gender || 'Not specified'}
+- BMI: ${bmi ? bmi.toFixed(1) : 'Not calculated'} (${bmiStatus})
+- Identified Food: ${foodItem}
+- Estimated Nutrition (per serving): ${nutritionInfo.calories} Calories, ${nutritionInfo.protein}g Protein, ${nutritionInfo.carbs}g Carbs, ${nutritionInfo.fat}g Fat
 
-    // BMI-based recommendations
-    if (bmi < 18.5) {
-      recommendations.push(`Hey ${userName}, this food can help you gain healthy weight! Consider adding nuts or ghee for extra calories.`);
-    } else if (bmi > 25) {
-      recommendations.push(`${userName}, let's be mindful of portion sizes with this food. Maybe pair it with more vegetables?`);
+Your task is to generate exactly 3 distinct, highly personalized bullet points of recommendations:
+1. The first bullet point MUST explicitly state that the food item "${foodItem}" has been identified and clearly evaluate whether it is a good, moderate, or poor choice for the user's specific health goals and current BMI.
+2. The second bullet point must analyze the nutritional content of the food (oil, trans-fats, carbs, protein, sugars, etc.) and explain its health impact.
+3. The third bullet point must provide a practical alternative or actionable instruction (e.g., portion control, blotting oil, choosing brown rice, pairing with vegetables/proteins, or workout adjustments).
+
+Rules:
+- Output exactly 3 lines, one recommendation per line.
+- Do NOT prefix lines with numbers, dashes, stars, or bullets (just return the raw text).
+- Be conversational, supportive, and realistic like a helpful coach.`;
+
+      const completion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: 'user',
+            content: systemPrompt
+          }
+        ],
+        model: this.groqModel,
+        temperature: 0.6,
+        max_tokens: 300
+      });
+
+      const text = completion.choices[0]?.message?.content || '';
+      
+      const recommendations = text
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => line.replace(/^[\s\d\.\-\*\•\+\>]+/g, '').trim()) // Strip list bullet characters
+        .filter(line => line.length > 0)
+        .slice(0, 3); // Take top 3 recommendations
+
+      if (recommendations.length >= 2) {
+        console.log('✅ Generated dynamic food recommendations via Groq LLM');
+        return recommendations;
+      }
+    } catch (error) {
+      console.error('❌ Error generating AI food recommendations, falling back to rule-based logic:', error);
+    }
+
+    // Fallback: Rule-based recommendations
+    const recommendations = [];
+    const isUnhealthy = this.isUnhealthyFood(foodItem);
+
+    // BMI & Health-based recommendations
+    if (isUnhealthy) {
+      recommendations.push(`We identified "${foodItem}". Let's be careful, ${userName}. This food is high in oils/fats/sugars, making it a poor choice for your daily wellness goals.`);
+      recommendations.push("Try to consume this in moderation or keep it as an occasional cheat meal.");
+      if (bmi > 25) {
+        recommendations.push("Since your BMI indicates you are in the overweight range, replacing this with a lower-calorie alternative is highly recommended.");
+      }
     } else {
-      recommendations.push(`Great choice, ${userName}! This fits well into a balanced diet.`);
+      recommendations.push(`We identified "${foodItem}".`);
+      if (bmi < 18.5) {
+        recommendations.push(`This is a good choice to help you gain healthy weight! Consider adding nuts or ghee for extra calories.`);
+      } else if (bmi > 25) {
+        recommendations.push(`Since your BMI indicates you are overweight, let's be mindful of portion sizes with this food and pair it with fresh vegetables.`);
+      } else {
+        recommendations.push(`Great choice! This fits well into a balanced diet and complements your healthy BMI.`);
+      }
     }
 
     // Food-specific recommendations
-    if (foodItem.toLowerCase().includes('rice')) {
-      recommendations.push('Consider brown rice for more fiber and nutrients.');
-      recommendations.push('Pair with dal and vegetables for a complete meal.');
-    } else if (foodItem.toLowerCase().includes('sweet') || foodItem.toLowerCase().includes('dessert')) {
-      recommendations.push('Enjoy in moderation - maybe save it for special occasions!');
-      recommendations.push('Consider having it after a workout for better metabolism.');
+    const lowerFood = foodItem.toLowerCase().replace(/_/g, ' ');
+    if (lowerFood.includes('samosa') || lowerFood.includes('chole bhature') || lowerFood.includes('fries') || lowerFood.includes('onion rings') || lowerFood.includes('calamari') || lowerFood.includes('wings')) {
+      recommendations.push('Deep-fried foods contain trans fats which can increase bad cholesterol. Consider baked alternatives if possible!');
+      recommendations.push('Use paper towels to blot excess oil before eating.');
+    } else if (lowerFood.includes('rice') || lowerFood.includes('biryani') || lowerFood.includes('pulao')) {
+      recommendations.push('Consider choosing brown rice for more fiber and nutrients next time.');
+      recommendations.push('Pair with dal or a high-protein curry and vegetables for a complete meal.');
+    } else if (lowerFood.includes('sweet') || lowerFood.includes('dessert') || lowerFood.includes('jamun') || lowerFood.includes('jalebi') || lowerFood.includes('cake') || lowerFood.includes('ice cream')) {
+      recommendations.push('High sugar intake leads to quick spikes and crashes in energy. Keep your portions small!');
+      recommendations.push('Consider enjoying it shortly after a workout when your insulin sensitivity is highest.');
+    } else if (lowerFood.includes('butter chicken') || lowerFood.includes('dal makhani') || lowerFood.includes('paneer') || lowerFood.includes('curry')) {
+      recommendations.push('This dish has high levels of saturated fats (cream/butter). Consider limiting the gravy portion.');
+      recommendations.push('Pair with whole-wheat roti instead of butter naan.');
     }
 
     return recommendations;
@@ -1551,15 +1669,25 @@ Remember: You have access to their complete coding journey and progress data. Us
   generateFoodAnalysisMessage(foodItem, userContext, bmi) {
     const userName = userContext.name || 'friend';
     const bmiStatus = this.getBMIStatus(bmi);
+    const isUnhealthy = this.isUnhealthyFood(foodItem);
     
     let message = `Hey ${userName}, I can see you're having ${foodItem}! `;
     
-    if (bmiStatus === 'Normal weight') {
-      message += `Your BMI looks great, so this fits well into your balanced lifestyle. Keep making those smart choices!`;
-    } else if (bmiStatus === 'Underweight') {
-      message += `Since you're looking to gain some healthy weight, this could be a good choice. Consider adding some healthy fats or proteins to boost the nutritional value!`;
-    } else if (bmiStatus === 'Overweight') {
-      message += `Let's be mindful about portions and maybe pair this with some fresh vegetables. Remember, it's all about balance, and I believe in you!`;
+    if (isUnhealthy) {
+      message += `Keep in mind that this is a calorie-dense dish high in fats or sugars. `;
+      if (bmiStatus === 'Overweight' || bmiStatus === 'Obese') {
+        message += `Since you're working on weight management, it is best to control the portion size and pair it with fresh greens to stay on track.`;
+      } else {
+        message += `While your BMI is in a good range, consuming these in moderation is key to maintaining cardiovascular health and high energy levels!`;
+      }
+    } else {
+      if (bmiStatus === 'Normal weight') {
+        message += `Your BMI looks great, so this fits well into your balanced lifestyle. Keep making those smart choices!`;
+      } else if (bmiStatus === 'Underweight') {
+        message += `Since you're looking to gain some healthy weight, this could be a good choice. Consider adding some healthy fats or proteins to boost the nutritional value!`;
+      } else if (bmiStatus === 'Overweight') {
+        message += `Let's be mindful about portions and maybe pair this with some fresh vegetables. Remember, it's all about balance, and I believe in you!`;
+      }
     }
     
     return message;
@@ -1578,7 +1706,26 @@ Remember: You have access to their complete coding journey and progress data. Us
       'dosa': { calories: 168, protein: 4, carbs: 25, fat: 6 },
       'idli': { calories: 39, protein: 2, carbs: 8, fat: 0.3 },
       'samosa': { calories: 262, protein: 3.5, carbs: 24, fat: 17 },
-      'paratha': { calories: 126, protein: 3, carbs: 18, fat: 5 }
+      'paratha': { calories: 126, protein: 3, carbs: 18, fat: 5 },
+      'butter_chicken': { calories: 350, protein: 22, carbs: 8, fat: 25 },
+      'butter chicken': { calories: 350, protein: 22, carbs: 8, fat: 25 },
+      'chai': { calories: 90, protein: 2, carbs: 12, fat: 3 },
+      'chole_bhature': { calories: 450, protein: 12, carbs: 55, fat: 20 },
+      'chole bhature': { calories: 450, protein: 12, carbs: 55, fat: 20 },
+      'dal_makhani': { calories: 280, protein: 10, carbs: 30, fat: 14 },
+      'dal makhani': { calories: 280, protein: 10, carbs: 30, fat: 14 },
+      'dhokla': { calories: 120, protein: 4, carbs: 18, fat: 3 },
+      'filter_coffee': { calories: 80, protein: 2, carbs: 10, fat: 3 },
+      'filter coffee': { calories: 80, protein: 2, carbs: 10, fat: 3 },
+      'gulab_jamun': { calories: 150, protein: 2, carbs: 25, fat: 5 },
+      'gulab jamun': { calories: 150, protein: 2, carbs: 25, fat: 5 },
+      'jalebi': { calories: 150, protein: 1, carbs: 30, fat: 3 },
+      'kathi_roll': { calories: 320, protein: 12, carbs: 38, fat: 12 },
+      'kathi roll': { calories: 320, protein: 12, carbs: 38, fat: 12 },
+      'kadai_paneer': { calories: 290, protein: 14, carbs: 8, fat: 22 },
+      'kadai paneer': { calories: 290, protein: 14, carbs: 8, fat: 22 },
+      'tandoori_chicken': { calories: 260, protein: 30, carbs: 2, fat: 12 },
+      'tandoori chicken': { calories: 260, protein: 30, carbs: 2, fat: 12 }
     };
     
     const lowerFoodItem = foodItem?.toLowerCase() || '';

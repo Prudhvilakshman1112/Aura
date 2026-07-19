@@ -187,8 +187,8 @@ router.post('/chat', authenticateToken, async (req, res) => {
       success: true,
       response: chatResponse.response,
       sentiment: chatResponse.sentiment,
-      todaysSolved: chatResponse.todaysSolved,
-      recommendations: chatResponse.recommendations,
+      todaysSolved: chatResponse.dailyProgress,
+      recommendations: chatResponse.suggestions,
       personalizedMessage: chatResponse.personalizedMessage,
       timestamp: new Date().toISOString(),
       context_summary: {
@@ -196,7 +196,7 @@ router.post('/chat', authenticateToken, async (req, res) => {
         modules_completed_today: userContext.modules_completed_today,
         current_streak: userContext.coding_current_streak,
         active_career_paths: userContext.active_career_paths,
-        daily_progress_integrated: chatResponse.todaysSolved ? true : false
+        daily_progress_integrated: chatResponse.dailyProgress ? true : false
       }
     });
 

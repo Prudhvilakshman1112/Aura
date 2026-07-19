@@ -366,14 +366,14 @@ router.post('/health-chat', authenticateToken, async (req, res) => {
 
     const userContext = userResult.rows[0];
     
-    // Generate AI response using health chat service
-    const chatResponse = await AIService.generateHealthChatResponse(message, userContext);
+    // Generate AI response using physical coach chat service (which uses LLM)
+    const chatResponse = await AIService.generatePhysicalCoachResponse(message, userContext);
     
     console.log('🤖 Health chat response generated successfully');
 
     res.json({
       success: true,
-      response: chatResponse,
+      response: chatResponse.response,
       timestamp: new Date().toISOString()
     });
 

@@ -90,7 +90,7 @@ router.get('/goals/:year/:month', authenticateToken, async (req, res) => {
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 
@@ -148,7 +148,7 @@ router.put('/goals', authenticateToken, validateRequest(monthlyGoalSchema), asyn
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 
@@ -198,7 +198,7 @@ router.get('/daily/:date', authenticateToken, async (req, res) => {
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 
@@ -255,7 +255,7 @@ router.put('/daily', authenticateToken, validateRequest(dailyActivitySchema), as
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 
@@ -325,7 +325,7 @@ router.get('/progress/:year/:month', authenticateToken, async (req, res) => {
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 
@@ -361,7 +361,7 @@ router.get('/monthly-range/:year/:month', authenticateToken, async (req, res) =>
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 
@@ -561,7 +561,7 @@ router.get('/streak/current', authenticateToken, async (req, res) => {
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 
@@ -712,7 +712,7 @@ router.get('/streak/history/:days', authenticateToken, async (req, res) => {
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 

@@ -65,7 +65,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 
@@ -169,7 +169,7 @@ router.put('/profile', authenticateToken, validateRequest(profileUpdateSchema), 
       message: 'Internal server error'
     });
   } finally {
-    await client.end();
+    client.release();
   }
 });
 

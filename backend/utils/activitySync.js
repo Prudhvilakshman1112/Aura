@@ -225,7 +225,7 @@ export class ActivitySyncService {
       console.error('❌ Error syncing career progress:', error);
       throw error;
     } finally {
-      await client.end();
+      client.release();
     }
   }
   
@@ -379,7 +379,7 @@ export class ActivitySyncService {
       console.error('❌ Error updating streak tracking:', error);
       throw error;
     } finally {
-      await client.end();
+      client.release();
     }
   }
   
@@ -423,7 +423,7 @@ export class ActivitySyncService {
       console.error('❌ Error in scheduled auto-sync:', error);
       throw error;
     } finally {
-      await client.end();
+      client.release();
     }
   }
 }
