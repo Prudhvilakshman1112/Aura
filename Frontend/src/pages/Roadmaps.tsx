@@ -21,6 +21,8 @@ import {
 import { api } from "@/lib/api";
 import { RoadmapDetailView } from "@/components/roadmaps/RoadmapDetailView";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 interface Module {
   name: string;
   completed: boolean;
@@ -78,10 +80,10 @@ const Roadmaps = () => {
       
       // Fetch templates and user paths with proper headers
       const [templatesResponse, userPathsResponse] = await Promise.all([
-        fetch('http://localhost:3001/api/roadmaps/templates', {
+        fetch(`${BACKEND_URL}/api/roadmaps/templates`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch('http://localhost:3001/api/roadmaps/user-paths', {
+        fetch(`${BACKEND_URL}/api/roadmaps/user-paths`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
@@ -97,7 +99,7 @@ const Roadmaps = () => {
       } else {
         // If user paths fail, try to initialize tables
         try {
-          await fetch('http://localhost:3001/api/roadmaps/init-tables', {
+          await fetch(`${BACKEND_URL}/api/roadmaps/init-tables`, {
             method: 'POST',
             headers: { 
               'Authorization': `Bearer ${token}`,
@@ -106,7 +108,7 @@ const Roadmaps = () => {
           });
           
           // Retry fetching user paths
-          const retryResponse = await fetch('http://localhost:3001/api/roadmaps/user-paths', {
+          const retryResponse = await fetch(`${BACKEND_URL}/api/roadmaps/user-paths`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (retryResponse.ok) {
@@ -137,7 +139,7 @@ const Roadmaps = () => {
         console.log('Roadmap selected successfully:', response.data);
         
         // Fetch the roadmap details with user progress
-        const roadmapResponse = await fetch(`http://localhost:3001/api/roadmaps/roadmap/${templateId}`, {
+        const roadmapResponse = await fetch(`${BACKEND_URL}/api/roadmaps/roadmap/${templateId}`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         
@@ -208,7 +210,7 @@ const Roadmaps = () => {
       // Use POST method to delete career path (avoids server restart requirement)
       console.log(`Attempting to delete career path ID: ${careerPathId}`);
       
-      const response = await fetch(`http://localhost:3001/api/roadmaps/delete-career-path`, {
+      const response = await fetch(`${BACKEND_URL}/api/roadmaps/delete-career-path`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -353,7 +355,7 @@ const Roadmaps = () => {
                             onClick={async () => {
                               // Fetch roadmap details with user progress
                               try {
-                                const response = await fetch(`http://localhost:3001/api/roadmaps/roadmap/${path.roadmap_id}`, {
+                                const response = await fetch(`${BACKEND_URL}/api/roadmaps/roadmap/${path.roadmap_id}`, {
                                   headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                                 });
                                 if (response.ok) {
@@ -421,7 +423,7 @@ const Roadmaps = () => {
                                     e.stopPropagation();
                                     // Fetch roadmap details with user progress
                                     try {
-                                      const response = await fetch(`http://localhost:3001/api/roadmaps/roadmap/${path.roadmap_id}`, {
+                                      const response = await fetch(`${BACKEND_URL}/api/roadmaps/roadmap/${path.roadmap_id}`, {
                                         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                                       });
                                       if (response.ok) {

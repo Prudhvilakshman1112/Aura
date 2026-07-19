@@ -27,6 +27,8 @@ import {
   X
 } from "lucide-react";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 const PhysicalCoach = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -65,7 +67,7 @@ const PhysicalCoach = () => {
       const formData = new FormData();
       formData.append('foodImage', selectedImage);
 
-      const response = await fetch('http://localhost:3001/api/physical-coach/food-analysis', {
+      const response = await fetch(`${BACKEND_URL}/api/physical-coach/food-analysis`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -93,7 +95,7 @@ const PhysicalCoach = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/physical-coach/diet-plan', {
+      const response = await fetch(`${BACKEND_URL}/api/physical-coach/diet-plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +128,7 @@ const PhysicalCoach = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:3001/api/physical-coach/exercise-plan', {
+      const response = await fetch(`${BACKEND_URL}/api/physical-coach/exercise-plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

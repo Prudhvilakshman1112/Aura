@@ -13,6 +13,8 @@ import {
   Activity
 } from "lucide-react";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 interface ChatMessage {
   id: string;
   type: 'user' | 'assistant';
@@ -62,7 +64,7 @@ const HealthChatBoard = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/physical-coach/health-chat', {
+      const response = await fetch(`${BACKEND_URL}/api/physical-coach/health-chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

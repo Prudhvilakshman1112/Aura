@@ -14,6 +14,8 @@ import {
   Sparkles
 } from "lucide-react";
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 interface ChatMessage {
   id: string;
   type: 'user' | 'assistant';
@@ -63,7 +65,7 @@ const MentalCoachChatBoard = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/mental-coach/chat', {
+      const response = await fetch(`${BACKEND_URL}/api/mental-coach/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

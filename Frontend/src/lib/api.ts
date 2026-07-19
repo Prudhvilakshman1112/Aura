@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:3001/api';
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = `${BACKEND_URL}/api`;
 
 // Types for API responses
 export interface ApiResponse<T = any> {
